@@ -103,7 +103,7 @@ def match_download(request: HttpRequest):
             for matcher in matchers:
                 if re.search(matcher.pattern, torrent.title) is not None:
                     try:
-                        client.add_torrent(torrent.enclosure_url, download_dir=matcher.download_dir, paused=True)
+                        client.add_torrent(torrent.enclosure_url, download_dir=matcher.download_dir)
                         torrent.added = True
                     except Exception:
                         logging.error("Failed to add torrent '%s'.", torrent.title)
