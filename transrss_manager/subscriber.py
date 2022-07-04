@@ -84,6 +84,11 @@ def torrent_upload(torrent: RSSTorrent, feed: FeedSource):
     check_res: res.HTTPResponse = http.request('GET', f'http://127.0.0.1:8000/api/torrent/{torrent.guid}/')
     if check_res.status == 200:
         logging.debug("Torrent already exists: %s", torrent.title)
+        alive_res: res.HTTPResponse = http.request('PUT', f'http://127.0.0.1:8000/api/torrent/keep-alive/{torrent.guid}/')
+        if alive_res.status == 200:
+            logging.debug("Keep torrent alive: %s", torrent.title)
+        else:
+            logging.error("Cannot make torrent alive: %s", torrent.title)
     else:
         upload_data = json.dumps({
             'guid': torrent.guid,
@@ -129,8 +134,27 @@ def api_login():
         raise ValueError(f"Cannot login with the priveded credential {json.dumps(DJANGO_CREDENTIAL)}: {detail}")
 
 
+def feed_begin_update():
+    begin_res: res.HTTPResponse = http.request('POST', 'http://127.0.0.1:8000/api/torrent/begin-update/', fields={})
+    if begin_res.status == 200:
+        logging.debug("Set alive to false for all torrents.")
+    else:
+        logging.error("Cannot set alive to false for all torrents.")
+        raise RuntimeError("Cannot set alive to false for all torrents.")
+
+
+def feed_end_update():
+    begin_res: res.HTTPResponse = http.request('DELETE', 'http://127.0.0.1:8000/api/torrent/end-update/')
+    if begin_res.status == 200:
+        logging.debug("Removed all died torrents.")
+    else:
+        logging.error("Cannot remove all died torrents.")
+        raise RuntimeError("Cannot remove all died torrents.")
+
+
 def feed_load():
     api_login()
+    feed_begin_update()
     fs_res: res.HTTPResponse = http.request('GET', 'http://127.0.0.1:8000/api/feed/')
     if fs_res.status == 200:
         fs_list = json.loads(fs_res.data)
@@ -139,7 +163,8 @@ def feed_load():
             logging.info("Reading #%s feed '%s'", i, feed.title)
             feed_parse(feed)
             logging.info("Successfully load #%s feed '%s'", i, feed.title)
-        match_res: res.HTTPResponse = http.request('GET', 'http://127.0.0.1:8000/control/match/')
+        feed_end_update()
+        match_res: res.HTTPResponse = http.request('GET', 'http://127.0.0.1:8000/api/torrent/match/')
         if match_res.status == 200:
             logging.info("Successfully refresh all torrents.")
     else:

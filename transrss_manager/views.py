@@ -1,5 +1,3 @@
-import re
-import logging
 from multiprocessing import Process
 from this import d
 from django.http import HttpResponseForbidden, HttpResponseServerError
@@ -7,9 +5,6 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth import authenticate, login, logout, get_user
 from django.core.exceptions import PermissionDenied, BadRequest
 from django.http.request import HttpRequest
-from django.db.models.query import QuerySet
-from transmission_rpc import Client
-from transrss.settings import TRANSMISSION_CONFIG
 from transrss_manager.models import FeedSource, FeedMatcher, Torrent
 from transrss_manager.forms import FeedAddForm, MatcherAddForm
 from transrss_manager.subscriber import feed_load
@@ -111,36 +106,6 @@ def matcher_delete(request: HttpRequest, feed_id: int, matcher_id: int):
         return redirect('feed_detail', id=feed_id)
 
     return HttpResponseForbidden()
-
-
-def match_download(request: HttpRequest):
-    """Match torrents and add to transmission
-
-    Parameters
-    ----------
-    request : HttpRequest
-        Http request instance.
-    """
-    if not request.user.is_authenticated:
-        raise PermissionDenied
-
-    client = Client(**TRANSMISSION_CONFIG)
-    feeds = FeedSource.objects.all()
-    for feed in feeds:
-        torrents: QuerySet[Torrent] = Torrent.objects.filter(source=feed)
-        matchers: QuerySet[FeedMatcher] = FeedMatcher.objects.filter(source=feed)
-        for torrent in torrents:
-            if torrent.added:
-                continue
-            for matcher in matchers:
-                if re.search(matcher.pattern, torrent.title) is not None:
-                    try:
-                        client.add_torrent(torrent.enclosure_url, download_dir=matcher.download_dir, paused=True)
-                        torrent.added = True
-                    except Exception:
-                        logging.error("Failed to add torrent '%s'.", torrent.title)
-            torrent.save()
-    return redirect(to="/")
 
 
 def torrent_refresh(request: HttpRequest):

@@ -27,8 +27,9 @@ class Torrent(models.Model):
     enclosure_url = models.URLField(
         validators=[URLValidator(schemes=['http', 'https', 'ftp', 'ftps', 'magnet'])]
     )
-    added = models.BooleanField(default=False)
     source = models.ForeignKey(FeedSource, on_delete=models.CASCADE, blank=True, null=True)
+    added = models.BooleanField(default=False)
+    alive = models.BooleanField(default=True)
 
     def __str__(self) -> str:
         return self.title
