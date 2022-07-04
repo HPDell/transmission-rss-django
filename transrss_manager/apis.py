@@ -3,8 +3,10 @@ from django.core.exceptions import PermissionDenied
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.parsers import JSONParser
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import HttpRequest
 from rest_framework.response import Response
 from .models import FeedSource, Torrent
@@ -12,6 +14,8 @@ from .serializers import FeedSourceSerializer, TorrentSerializer
 
 
 @api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def api_feed_source_list(request: HttpRequest):
     if request.method == 'GET':
         feed_sources = FeedSource.objects.all()
@@ -23,16 +27,15 @@ def api_feed_source_list(request: HttpRequest):
 
 @csrf_exempt
 @api_view(['GET', 'POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def api_torrent_list(request: HttpRequest):
     if request.method == 'GET':
         torrents = Torrent.objects.all()
         serializer = TorrentSerializer(torrents, many=True)
         return Response(serializer.data)
 
-    elif request.method == 'POST':
-        if not request.user.is_authenticated:
-            raise PermissionDenied
-        
+    elif request.method == 'POST':        
         data = JSONParser().parse(request)
         serializer = TorrentSerializer(data=data)
         if serializer.is_valid():
@@ -45,6 +48,8 @@ def api_torrent_list(request: HttpRequest):
 
 @csrf_exempt
 @api_view(['GET', 'PUT', 'DELETE'])
+@authentication_classes([])
+@permission_classes([IsAuthenticated])
 def api_torrent_detail(request: HttpRequest, id: str):
     torrent = get_object_or_404(Torrent, pk=id)
 
@@ -53,9 +58,6 @@ def api_torrent_detail(request: HttpRequest, id: str):
         return Response(serializer.data)
 
     elif request.method == 'PUT':
-        if not request.user.is_authenticated:
-            raise PermissionDenied
-
         data = JSONParser().parse(request)
         serializer = TorrentSerializer(torrent, data=data)
         if serializer.is_valid():
@@ -64,9 +66,6 @@ def api_torrent_detail(request: HttpRequest, id: str):
         return JsonResponse(serializer.errors, status=400)
     
     elif request.method == 'DELETE':
-        if not request.user.is_authenticated:
-            raise PermissionDenied
-
         torrent.delete()
         return Response(status=204)
     

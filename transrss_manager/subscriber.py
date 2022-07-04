@@ -13,10 +13,17 @@ from xsdata.formats.dataclass.parsers.config import ParserConfig
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s | %(levelname)s | %(message)s')
 
-http = urllib3.PoolManager()
+global http
+http = urllib3.PoolManager(headers={
+    'Content-Type': 'application/json'
+})
 xmlparser = XmlParser(ParserConfig(fail_on_unknown_properties=False))
 
 SUBSCRIBER_INVERVAL = (lambda x: int(x[0]) if x is not None else 600)(re.match("\d+", os.getenv('SUBSCRIBER_INVERVAL', '600')))
+DJANGO_CREDENTIAL = {
+    'username': os.getenv('DJANGO_USERNAME', 'admin'),
+    'password': os.getenv('DJANGO_PASSWORD', 'admin')
+}
 
 @dataclass
 class FeedSource:
@@ -108,7 +115,22 @@ def feed_parse(feed: FeedSource):
             torrent_upload(item, feed)
 
 
+def api_login():
+    global http
+    auth_res: res.HTTPResponse = http.request('POST', 'http://127.0.0.1:8000/api-auth-token/', body=json.dumps(DJANGO_CREDENTIAL).encode('utf-8'))
+    if auth_res.status == 200:
+        token = json.loads(auth_res.data)['token']
+        # http.headers['X-CSRFToken'] = csrftoken
+        http = urllib3.PoolManager(headers={
+            'Authorization': f'Token {token}'
+        })
+    else:
+        detail = json.loads(auth_res.data)['detail']
+        raise ValueError(f"Cannot login with the priveded credential {json.dumps(DJANGO_CREDENTIAL)}: {detail}")
+
+
 def feed_load():
+    api_login()
     fs_res: res.HTTPResponse = http.request('GET', 'http://127.0.0.1:8000/api/feed/')
     if fs_res.status == 200:
         fs_list = json.loads(fs_res.data)
@@ -121,7 +143,8 @@ def feed_load():
         if match_res.status == 200:
             logging.info("Successfully refresh all torrents.")
     else:
-        logging.error("Failed to fetch feed sources.")
+        detail = json.loads(fs_res.data)['detail']
+        logging.error(f"Failed to fetch feed sources: {detail}.")
 
 
 def feed_subscribe():

@@ -4,3 +4,4 @@ urllib3==1.26.9
 xsdata==22.5
 lxml==4.9.1
 transmission-rpc==3.3.2
+cookies==2.2.1

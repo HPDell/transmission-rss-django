@@ -14,7 +14,8 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import include, path
+from rest_framework.authtoken import views as authtoken_views
 from transrss_manager import apis, views
 
 urlpatterns = [
@@ -23,6 +24,8 @@ urlpatterns = [
     path('api/feed/', apis.api_feed_source_list),
     path('api/torrent/', apis.api_torrent_list),
     path('api/torrent/<str:id>/', apis.api_torrent_detail),
+    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    path('api-auth-token/', authtoken_views.obtain_auth_token),
     path('control/match/', views.match_download),
     path('feed/', views.feed_list, name="feed_list"),
     path('feed/<int:id>/', views.feed_detail, name="feed_detail"),

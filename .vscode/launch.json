@@ -10,7 +10,8 @@
             "request": "launch",
             "program": "transrss_manager/subscriber.py",
             "console": "integratedTerminal",
-            "justMyCode": true
+            "justMyCode": true,
+            "envFile": "${workspaceFolder}/.env"
         },
         {
             "name": "Python: Django",
