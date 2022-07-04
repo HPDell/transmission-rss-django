@@ -25,9 +25,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-)jf$c+thr=x)8qkx6cu5%ulvloy8nh(2rz@rn*y#&+xvz0n09&'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = (os.getenv('TRANSRSS_MODE', 'RELEASE').upper() == 'DEBUG')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv('TRANSRSS_HOST', 'localhost').split(";")
 
 
 # Application definition
@@ -142,3 +142,8 @@ TRANSMISSION_CONFIG = {
     'username': os.getenv('TRANSMISSION_USERNAME', 'admin'),
     'password': os.getenv('TRANSMISSION_PASSWORD', 'admin')
 }
+
+STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'static'
+STATICFILES_DIRS = []
+ADMIN_MEDIA_PREFIX = STATIC_URL + 'admin/'

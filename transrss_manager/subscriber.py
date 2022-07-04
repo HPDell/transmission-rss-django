@@ -21,8 +21,8 @@ xmlparser = XmlParser(ParserConfig(fail_on_unknown_properties=False))
 
 SUBSCRIBER_INVERVAL = (lambda x: int(x[0]) if x is not None else 600)(re.match("\d+", os.getenv('SUBSCRIBER_INVERVAL', '600')))
 DJANGO_CREDENTIAL = {
-    'username': os.getenv('DJANGO_USERNAME', 'admin'),
-    'password': os.getenv('DJANGO_PASSWORD', 'admin')
+    'username': os.getenv('DJANGO_SUPERUSER_USERNAME', 'admin'),
+    'password': os.getenv('DJANGO_SUPERUSER_PASSWORD', 'admin')
 }
 
 @dataclass
@@ -81,10 +81,10 @@ class RSS:
 
 
 def torrent_upload(torrent: RSSTorrent, feed: FeedSource):
-    check_res: res.HTTPResponse = http.request('GET', f'http://127.0.0.1:8000/api/torrent/{torrent.guid}/')
+    check_res: res.HTTPResponse = http.request('GET', f'http://localhost:8000/api/torrent/{torrent.guid}/')
     if check_res.status == 200:
         logging.debug("Torrent already exists: %s", torrent.title)
-        alive_res: res.HTTPResponse = http.request('PUT', f'http://127.0.0.1:8000/api/torrent/keep-alive/{torrent.guid}/')
+        alive_res: res.HTTPResponse = http.request('PUT', f'http://localhost:8000/api/torrent/keep-alive/{torrent.guid}/')
         if alive_res.status == 200:
             logging.debug("Keep torrent alive: %s", torrent.title)
         else:
@@ -104,7 +104,7 @@ def torrent_upload(torrent: RSSTorrent, feed: FeedSource):
                 'url': feed.url
             }
         }).encode('utf-8')
-        upload_res: res.HTTPResponse = http.request('POST', 'http://127.0.0.1:8000/api/torrent/', body=upload_data)
+        upload_res: res.HTTPResponse = http.request('POST', 'http://localhost:8000/api/torrent/', body=upload_data)
         if upload_res.status == 201:
             logging.info("Saved torrent %s", torrent.title)
         else:
@@ -122,12 +122,13 @@ def feed_parse(feed: FeedSource):
 
 def api_login():
     global http
-    auth_res: res.HTTPResponse = http.request('POST', 'http://127.0.0.1:8000/api-auth-token/', body=json.dumps(DJANGO_CREDENTIAL).encode('utf-8'))
+    auth_res: res.HTTPResponse = http.request('POST', 'http://localhost:8000/api-auth-token/', body=json.dumps(DJANGO_CREDENTIAL).encode('utf-8'))
     if auth_res.status == 200:
         token = json.loads(auth_res.data)['token']
         # http.headers['X-CSRFToken'] = csrftoken
         http = urllib3.PoolManager(headers={
-            'Authorization': f'Token {token}'
+            'Content-Type': 'application/json',
+            'Authorization': f'Token {token}'           
         })
     else:
         detail = json.loads(auth_res.data)['detail']
@@ -135,7 +136,7 @@ def api_login():
 
 
 def feed_begin_update():
-    begin_res: res.HTTPResponse = http.request('POST', 'http://127.0.0.1:8000/api/torrent/begin-update/', fields={})
+    begin_res: res.HTTPResponse = http.request('POST', 'http://localhost:8000/api/torrent/begin-update/', fields={})
     if begin_res.status == 200:
         logging.debug("Set alive to false for all torrents.")
     else:
@@ -144,7 +145,7 @@ def feed_begin_update():
 
 
 def feed_end_update():
-    begin_res: res.HTTPResponse = http.request('DELETE', 'http://127.0.0.1:8000/api/torrent/end-update/')
+    begin_res: res.HTTPResponse = http.request('DELETE', 'http://localhost:8000/api/torrent/end-update/')
     if begin_res.status == 200:
         logging.debug("Removed all died torrents.")
     else:
@@ -155,7 +156,7 @@ def feed_end_update():
 def feed_load():
     api_login()
     feed_begin_update()
-    fs_res: res.HTTPResponse = http.request('GET', 'http://127.0.0.1:8000/api/feed/')
+    fs_res: res.HTTPResponse = http.request('GET', 'http://localhost:8000/api/feed/')
     if fs_res.status == 200:
         fs_list = json.loads(fs_res.data)
         for i, source in enumerate(fs_list):
@@ -164,7 +165,7 @@ def feed_load():
             feed_parse(feed)
             logging.info("Successfully load #%s feed '%s'", i, feed.title)
         feed_end_update()
-        match_res: res.HTTPResponse = http.request('GET', 'http://127.0.0.1:8000/api/torrent/match/')
+        match_res: res.HTTPResponse = http.request('GET', 'http://localhost:8000/api/torrent/match/')
         if match_res.status == 200:
             logging.info("Successfully refresh all torrents.")
     else:

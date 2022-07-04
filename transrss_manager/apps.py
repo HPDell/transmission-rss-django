@@ -9,7 +9,7 @@ class TransrssManagerConfig(AppConfig):
     name = 'transrss_manager'
     ''' Start the subscriber process
     '''
-    if os.getenv("SUBSCRIBER_MODE") != 'OFF':
+    if os.getenv("SUBSCRIBER_MODE", "ON") != 'OFF':
         subscriber = Process(target=feed_subscribe)
         subscriber.daemon = True
         subscriber.start()
