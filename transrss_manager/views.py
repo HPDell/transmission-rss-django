@@ -8,6 +8,7 @@ from django.db.models.query import QuerySet
 from transmission_rpc import Client
 from transrss.settings import TRANSMISSION_CONFIG
 from transrss_manager.models import FeedSource, FeedMatcher, Torrent
+from transrss_manager.forms import FeedAddForm
 
 
 def index(request: HttpRequest):
@@ -17,6 +18,18 @@ def index(request: HttpRequest):
         'feeds': feeds,
         'torrents': torrents
     })
+
+
+def feed_list(request: HttpRequest):
+    if request.method == 'GET':
+        return redirect('home')
+    
+    elif request.method == 'POST':
+        form = FeedAddForm(request.POST)
+        if form.is_valid():
+            feed = FeedSource(**form.cleaned_data)
+            feed.save()
+        return redirect('home')
 
 
 def feed_detail(request: HttpRequest, id: int):

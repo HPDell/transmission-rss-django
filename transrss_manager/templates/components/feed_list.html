@@ -1,13 +1,48 @@
-<h4 class="ps-3">Feeds</h4>
-<ul class="list-group list-group-flush">
-    <!-- <li class="list-group-item fw-bold">Feeds</li> -->
-    {% for item in feeds %}
-    <li class="list-group-item">
-        {% if feed and item.id == feed.id %}
-        <a class="text-decoration-none text-body fw-bold" href="{% url 'feed_detail' item.id %}">{{item.title}}</a>
-        {% else %}
-        <a class="text-decoration-none text-body" href="{% url 'feed_detail' item.id %}">{{item.title}}</a>
-        {% endif %}
-    </li>
-    {% endfor %}
-</ul>
+<div class="row">
+    <div class="d-flex flex-row align-items-top">
+        <h4>Feeds</h4>
+        <a class="ms-2 py-1" role="button" data-bs-toggle="modal" data-bs-target="#feed-add-model">
+            <i class="bi-plus-circle-fill"></i>
+        </a>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="feed-add-model" tabindex="-1" aria-labelledby="feed-add-model-label" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <form action="{% url 'feed_list' %}" method="POST">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="feed-add-model-label">Add Feed</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="feed-title">Title</label>
+                            <input type="text" class="form-control" name="title" id="feed-title">
+                        </div>
+                        <div class="mb-3">
+                            <label for="feed-title">URL</label>
+                            <input type="text" class="form-control" name="url" id="feed-url">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <ul class="list-group list-group-flush">
+        <!-- <li class="list-group-item fw-bold">Feeds</li> -->
+        {% for item in feeds %}
+        <li class="list-group-item">
+            {% if feed and item.id == feed.id %}
+            <a class="text-decoration-none text-body fw-bold" href="{% url 'feed_detail' item.id %}">{{item.title}}</a>
+            {% else %}
+            <a class="text-decoration-none text-body" href="{% url 'feed_detail' item.id %}">{{item.title}}</a>
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+</div>

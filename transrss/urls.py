@@ -24,6 +24,7 @@ urlpatterns = [
     path('api/torrent/', apis.api_torrent_list),
     path('api/torrent/<str:id>/', apis.api_torrent_detail),
     path('control/match/', views.match_download),
+    path('feed/', views.feed_list, name="feed_list"),
     path('feed/<int:id>/', views.feed_detail, name="feed_detail"),
     path('login/', views.user_login, name='login'),
     path('logout/', views.user_logout, name='logout')
