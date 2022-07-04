@@ -1,11 +1,14 @@
 <div class="row">
     <div class="d-flex flex-row align-items-top">
         <h4>Feeds</h4>
+        {% if user.is_authenticated %}
         <a class="ms-2 py-1" role="button" data-bs-toggle="modal" data-bs-target="#feed-add-model">
             <i class="bi-plus-circle-fill"></i>
         </a>
+        {% endif %}
     </div>
     <!-- Modal -->
+    {% if user.is_authenticated %}
     <div class="modal fade" id="feed-add-model" tabindex="-1" aria-labelledby="feed-add-model-label" aria-hidden="true">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
@@ -33,15 +36,22 @@
             </div>
         </div>
     </div>
+    {% endif %}
     <ul class="list-group list-group-flush">
         <!-- <li class="list-group-item fw-bold">Feeds</li> -->
         {% for item in feeds %}
-        <li class="list-group-item">
+        <li class="list-group-item d-flex flex-row justify-content-between align-items-top">
             {% if feed and item.id == feed.id %}
             <a class="text-decoration-none text-body fw-bold" href="{% url 'feed_detail' item.id %}">{{item.title}}</a>
             {% else %}
             <a class="text-decoration-none text-body" href="{% url 'feed_detail' item.id %}">{{item.title}}</a>
             {% endif %}
+            {% if user.is_authenticated %}
+            <form action="{% url 'feed_delete' item.id %}" method="POST">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-link btn-sm text-danger py-0"><i class="bi-x-circle-fill"></i></button>
+            </form>
+            {% endif %}    
         </li>
         {% endfor %}
     </ul>

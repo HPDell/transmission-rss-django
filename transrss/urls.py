@@ -26,6 +26,7 @@ urlpatterns = [
     path('control/match/', views.match_download),
     path('feed/', views.feed_list, name="feed_list"),
     path('feed/<int:id>/', views.feed_detail, name="feed_detail"),
+    path('feed/<int:id>/delete/', views.feed_delete, name="feed_delete"),
     path('login/', views.user_login, name='login'),
     path('logout/', views.user_logout, name='logout')
 ]

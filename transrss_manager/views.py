@@ -1,5 +1,6 @@
 import re
 import logging
+from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth import authenticate, login, logout, get_user
 from django.core.exceptions import PermissionDenied, BadRequest
@@ -30,15 +31,31 @@ def feed_list(request: HttpRequest):
             feed = FeedSource(**form.cleaned_data)
             feed.save()
         return redirect('home')
+    
+    return HttpResponseForbidden()
 
 
 def feed_detail(request: HttpRequest, id: int):
     feed = get_object_or_404(FeedSource, pk=id)
-    return render(request, 'feed.html', {
-        'feed': feed,
-        'feeds': FeedSource.objects.all(),
-        'matchers': FeedMatcher.objects.filter(source=feed).all()
-    })
+    
+    if request.method == 'GET':
+        return render(request, 'feed.html', {
+            'feed': feed,
+            'feeds': FeedSource.objects.all(),
+            'matchers': FeedMatcher.objects.filter(source=feed).all()
+        })
+
+    return HttpResponseForbidden()
+
+
+def feed_delete(request: HttpRequest, id: int):
+    feed = get_object_or_404(FeedSource, pk=id)
+
+    if request.method == 'POST':
+        feed.delete()
+        return redirect('home')
+
+    return HttpResponseForbidden()
 
 
 def match_download(request: HttpRequest):
