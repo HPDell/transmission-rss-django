@@ -1,0 +1,8 @@
+.devcontainer/
+.mypy_cache/
+.vscode/
+.env
+.git/
+static/
+.gitignore
+db.sqlite3
