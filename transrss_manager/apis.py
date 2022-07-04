@@ -1,4 +1,5 @@
 from django.http import JsonResponse
+from django.core.exceptions import PermissionDenied
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404
 from rest_framework import status
@@ -29,6 +30,9 @@ def api_torrent_list(request: HttpRequest):
         return Response(serializer.data)
 
     elif request.method == 'POST':
+        if not request.user.is_authenticated:
+            raise PermissionDenied
+        
         data = JSONParser().parse(request)
         serializer = TorrentSerializer(data=data)
         if serializer.is_valid():
@@ -49,6 +53,9 @@ def api_torrent_detail(request: HttpRequest, id: str):
         return Response(serializer.data)
 
     elif request.method == 'PUT':
+        if not request.user.is_authenticated:
+            raise PermissionDenied
+
         data = JSONParser().parse(request)
         serializer = TorrentSerializer(torrent, data=data)
         if serializer.is_valid():
@@ -57,6 +64,9 @@ def api_torrent_detail(request: HttpRequest, id: str):
         return JsonResponse(serializer.errors, status=400)
     
     elif request.method == 'DELETE':
+        if not request.user.is_authenticated:
+            raise PermissionDenied
+
         torrent.delete()
         return Response(status=204)
     
