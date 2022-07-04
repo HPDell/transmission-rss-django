@@ -1,6 +1,6 @@
 import re
 import logging
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseBadRequest, HttpResponseForbidden, HttpResponseServerError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth import authenticate, login, logout, get_user
 from django.core.exceptions import PermissionDenied, BadRequest
@@ -9,7 +9,7 @@ from django.db.models.query import QuerySet
 from transmission_rpc import Client
 from transrss.settings import TRANSMISSION_CONFIG
 from transrss_manager.models import FeedSource, FeedMatcher, Torrent
-from transrss_manager.forms import FeedAddForm
+from transrss_manager.forms import FeedAddForm, MatcherAddForm
 
 
 def index(request: HttpRequest):
@@ -54,6 +54,33 @@ def feed_delete(request: HttpRequest, id: int):
     if request.method == 'POST':
         feed.delete()
         return redirect('home')
+
+    return HttpResponseForbidden()
+
+
+def matcher_list(request: HttpRequest, feed_id: int):
+    feed = get_object_or_404(FeedSource, pk=feed_id)
+
+    if request.method == 'GET':
+        return redirect('home')
+    
+    elif request.method == 'POST':
+        form = MatcherAddForm(request.POST)
+        if form.is_valid():
+            matcher = FeedMatcher(source=feed, **form.cleaned_data)
+            matcher.save()
+            return redirect('feed_detail', id=feed_id)
+        else:
+            return HttpResponseServerError()
+
+    return HttpResponseForbidden()
+
+
+def matcher_delete(request: HttpRequest, feed_id: int, matcher_id: int):
+    if request.method == 'POST':
+        matcher = get_object_or_404(FeedMatcher, pk=matcher_id)
+        matcher.delete()
+        return redirect('feed_detail', id=feed_id)
 
     return HttpResponseForbidden()
 

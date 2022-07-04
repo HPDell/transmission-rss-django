@@ -16,30 +16,85 @@
                 {% include "components/feed_list.html" %}
             </div>
             <div class="col">
-                <h4 class="ps-1">Info</h4>
-                <dl class="row ps-1">
-                    <dt class="col-1">Title</dt>
-                    <dd class="col-11">{{feed.title}}</dd>
-                    <dt class="col-1">URL</dt>
-                    <dd class="col-11">{{feed.url}}</dd>
-                </dl>
-                <h4 class="ps-1">Matchers</h4>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th scope="col">Pattern</th>
-                            <th scope="col">Download Dir</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for item in matchers %}
-                        <tr>
-                            <td>{{item.pattern}}</td>
-                            <td>{{item.download_dir}}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                <div class="row">
+                    <div class="d-flex flex-row align-items-top">
+                        <h4>Info</h4>
+                    </div>
+                    <dl class="row ps-3">
+                        <dt class="col-1">Title</dt>
+                        <dd class="col-11">{{feed.title}}</dd>
+                        <dt class="col-1">URL</dt>
+                        <dd class="col-11">{{feed.url}}</dd>
+                    </dl>
+                </div>
+                <div class="row">
+                    <div class="d-flex flex-row align-items-top">
+                        <h4>Matchers</h4>
+                        {% if user.is_authenticated %}
+                        <a class="ms-2 py-1" role="button" data-bs-toggle="modal" data-bs-target="#matcher-add-model">
+                            <i class="bi-plus-circle-fill"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% if user.is_authenticated %}
+                    <div class="modal fade" id="matcher-add-model" tabindex="-1" aria-labelledby="matcher-add-model-label" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <form action="{% url 'matcher_list' feed.id %}" method="POST">
+                                    {% csrf_token %}
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="matcher-add-model-label">Add Matcher</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <label for="matcher-pattern">Pattern</label>
+                                            <input type="text" class="form-control" name="pattern" id="matcher-pattern">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="matcher-download-dir">Download Dir</label>
+                                            <input type="text" class="form-control" name="download_dir" id="matcher-download-dir">
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        <button type="submit" class="btn btn-primary">Save changes</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    <div class="container-fluid">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Pattern</th>
+                                    <th scope="col">Download Dir</th>
+                                    {% if user.is_authenticated %}
+                                    <th scope="col"></th>
+                                    {% endif %}                
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in matchers %}
+                                <tr>
+                                    <td>{{item.pattern}}</td>
+                                    <td>{{item.download_dir}}</td>
+                                    {% if user.is_authenticated %}
+                                    <td>
+                                        <form action="{% url 'matcher_delete' feed.id item.id %}" method="POST">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-link btn-sm text-danger py-0"><i class="bi-x-circle-fill"></i></button>
+                                        </form>
+                                    </td>
+                                    {% endif %}                
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

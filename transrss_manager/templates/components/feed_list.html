@@ -24,7 +24,7 @@
                             <input type="text" class="form-control" name="title" id="feed-title">
                         </div>
                         <div class="mb-3">
-                            <label for="feed-title">URL</label>
+                            <label for="feed-url">URL</label>
                             <input type="text" class="form-control" name="url" id="feed-url">
                         </div>
                     </div>
@@ -50,8 +50,8 @@
             <form action="{% url 'feed_delete' item.id %}" method="POST">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-link btn-sm text-danger py-0"><i class="bi-x-circle-fill"></i></button>
+                {% endif %}    
             </form>
-            {% endif %}    
         </li>
         {% endfor %}
     </ul>
