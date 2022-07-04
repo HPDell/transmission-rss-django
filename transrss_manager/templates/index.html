@@ -7,15 +7,25 @@
     <title>Transmission RSS</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.3/font/bootstrap-icons.css">
+    <style>
+        .torrent-title {
+            word-break: break-all;
+            word-wrap: break-word;
+        }
+
+        .torrent-publish-date {
+            word-break: keep-all;
+        }
+    </style>
 </head>
 <body>
     {% include "components/navbar.html" %}
     <div class="container-fluid py-3">
         <div class="row">
-            <div class="col-3">
+            <div class="col-xs-12 col-lg-3">
                 {% include "components/feed_list.html" %}
             </div>
-            <div class="col">
+            <div class="col-xs-12 col-lg-9">
                 <div class="d-flex flex-row align-items-top">
                     <h4 class="ps-1">Torrents</h4>
                     {% if user.is_authenticated %}
@@ -35,12 +45,12 @@
                         {% for torrent in torrents %}
                         <tr>
                             <td>
-                                <a class="text-decoration-none text-body" href="{{torrent.url}}">{{torrent.title}}</a>
+                                <a class="text-decoration-none text-body torrent-title" href="{{torrent.url}}">{{torrent.title}}</a>
                                 {% if torrent.added %}
                                 <i class="bi-check-circle-fill text-success"></i>
                                 {% endif %}
                             </td>
-                            <td>{{torrent.pub_date|date:"Y-m-d H:i"}}</td>
+                            <td class="torrent-publish-date">{{torrent.pub_date|date:"Y-m-d H:i"}}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
