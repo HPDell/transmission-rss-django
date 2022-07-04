@@ -1,5 +1,17 @@
+from turtle import title
 from django.db import models
 from django.core.validators import URLValidator
+
+
+class FeedSource(models.Model):
+    '''
+    Torrent feed source.
+    '''
+    title = models.CharField(max_length=255)
+    url = models.URLField()
+
+    def __str__(self) -> str:
+        return self.title
 
 
 class Torrent(models.Model):
@@ -16,20 +28,19 @@ class Torrent(models.Model):
         validators=[URLValidator(schemes=['http', 'https', 'ftp', 'ftps', 'magnet'])]
     )
     added = models.BooleanField(default=False)
+    source = models.ForeignKey(FeedSource, on_delete=models.CASCADE, blank=True, null=True)
 
-
-class FeedSource(models.Model):
-    '''
-    Torrent feed source.
-    '''
-    title = models.CharField(max_length=255)
-    url = models.URLField()
+    def __str__(self) -> str:
+        return self.title
 
 
 class FeedMatcher(models.Model):
     '''
     Torrent title matcher.
     '''
-    matcher = models.CharField(max_length=255)
+    pattern = models.CharField(max_length=255)
     download_dir = models.CharField(max_length=255)
     source = models.ForeignKey(FeedSource, on_delete=models.CASCADE)
+
+    def __str__(self) -> str:
+        return self.pattern

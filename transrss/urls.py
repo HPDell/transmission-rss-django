@@ -14,12 +14,14 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import include, path
-from transrss_manager import apis
+from django.urls import path
+from transrss_manager import apis, views
 
 urlpatterns = [
+    path('', views.index),
     path('admin/', admin.site.urls),
-    path('api/feed-source/', apis.api_feed_source_list),
+    path('control/match/', views.match_download),
+    path('api/feed/', apis.api_feed_source_list),
     path('api/torrent/', apis.api_torrent_list),
     path('api/torrent/<str:id>/', apis.api_torrent_detail)
 ]

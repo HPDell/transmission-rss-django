@@ -32,8 +32,8 @@ def api_torrent_list(request: HttpRequest):
         data = JSONParser().parse(request)
         serializer = TorrentSerializer(data=data)
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=201)
+            torrent = serializer.save()
+            return Response(TorrentSerializer(torrent).data, status=201)
         return Response(serializer.errors, status=400)
     
     return Response(status=status.HTTP_403_FORBIDDEN)

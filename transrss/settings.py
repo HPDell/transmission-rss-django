@@ -10,6 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
+import os
+import re
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -125,3 +127,10 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+TRANSMISSION_CONFIG = {
+    'host': os.getenv('TRANSMISSION_HOST', 'localhost'),
+    'port': (lambda x: int(x[0]) if x is not None else 9091)(re.match("\d{1,5}", os.getenv('TRANSMISSION_PORT', '9091'))),
+    'username': os.getenv('TRANSMISSION_USERNAME', 'admin'),
+    'password': os.getenv('TRANSMISSION_PASSWORD', 'admin')
+}

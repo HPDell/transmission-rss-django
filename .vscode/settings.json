@@ -1,6 +1,6 @@
 {
     "autoDocstring.docstringFormat": "numpy",
     "python.linting.pylintEnabled": false,
-    "python.linting.mypyEnabled": true,
-    "python.linting.enabled": true
+    "python.linting.enabled": true,
+    "python.linting.mypyEnabled": true
 }

@@ -6,7 +6,7 @@ class FeedSourceAdmin(admin.ModelAdmin):
     list_display = ('title',)
 
 class FeedMatcherAdmin(admin.ModelAdmin):
-    list_display = ('matcher', 'download_dir', 'source')
+    list_display = ('pattern', 'download_dir', 'source')
 
 class TorrentAdmin(admin.ModelAdmin):
     list_display = ('title', 'pub_date')

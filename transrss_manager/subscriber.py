@@ -15,6 +15,7 @@ xmlparser = XmlParser(ParserConfig(fail_on_unknown_properties=False))
 
 @dataclass
 class FeedSource:
+    id: int
     title: str
     url: str
 
@@ -67,7 +68,7 @@ class RSS:
     channel: RSSChannel = field(metadata={'type': 'Element'})
 
 
-def torrent_upload(torrent: RSSTorrent):
+def torrent_upload(torrent: RSSTorrent, feed: FeedSource):
     check_res: res.HTTPResponse = http.request('GET', f'http://127.0.0.1:8000/api/torrent/{torrent.guid}/')
     if check_res.status == 200:
         logging.debug("Torrent already exists: %s", torrent.title)
@@ -79,7 +80,12 @@ def torrent_upload(torrent: RSSTorrent):
             'link': torrent.link,
             'enclosure_type': torrent.enclosure.type,
             'enclosure_length': torrent.enclosure.length,
-            'enclosure_url': torrent.enclosure.url
+            'enclosure_url': torrent.enclosure.url,
+            'source': {
+                'id': feed.id,
+                'title': feed.title,
+                'url': feed.url
+            }
         }).encode('utf-8')
         upload_res: res.HTTPResponse = http.request('POST', 'http://127.0.0.1:8000/api/torrent/', body=upload_data)
         if upload_res.status == 201:
@@ -88,23 +94,23 @@ def torrent_upload(torrent: RSSTorrent):
             logging.error("Error when saving torrent %s: %s", torrent.title, upload_res.data.decode())
 
 
-def feed_parse(feed_url: str):
-    rss_res: res.HTTPResponse = http.request('GET', feed_url)
+def feed_parse(feed: FeedSource):
+    rss_res: res.HTTPResponse = http.request('GET', feed.url)
     if rss_res.status == 200:
         rss: RSS = xmlparser.from_bytes(rss_res.data, RSS)
         for item in rss.channel.item:
             logging.debug("Found torrent published at %s : %s", item.pub_date, item.title)
-            torrent_upload(item)
+            torrent_upload(item, feed)
 
 
 def subscribe():
-    fs_res: res.HTTPResponse = http.request('GET', 'http://127.0.0.1:8000/api/feed-source/')
+    fs_res: res.HTTPResponse = http.request('GET', 'http://127.0.0.1:8000/api/feed/')
     if fs_res.status == 200:
         fs_list = json.loads(fs_res.data)
         for i, source in enumerate(fs_list):
-            fs = FeedSource(**source)
-            logging.info("Reading #%s feed '%s'", i, fs.title)
-            feed_parse(fs.url)
+            feed = FeedSource(**source)
+            logging.info("Reading #%s feed '%s'", i, feed.title)
+            feed_parse(feed)
     else:
         logging.error("Failed to fetch feed sources.")
 
