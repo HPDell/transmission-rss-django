@@ -4,5 +4,20 @@
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto"></ul>
+            <div class="d-flex">
+                <ul class="navbar-nav me-auto">
+                    {% if user.is_authenticated %}
+                    <li class="nav-item"><a href="{% url 'admin:index' %}" class="nav-link">Control Panel</a></li>
+                    <li class="nav-item"><a href="{% url 'logout' %}" class="nav-link">Logout</a></li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a href="{% url 'login' %}" class="nav-link">Login</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
     </div>
 </nav>

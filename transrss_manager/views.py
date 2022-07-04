@@ -1,6 +1,8 @@
 import re
 import logging
 from django.shortcuts import get_object_or_404, redirect, render
+from django.contrib.auth import authenticate, login, logout, get_user
+from django.core.exceptions import PermissionDenied, BadRequest
 from django.http.request import HttpRequest
 from django.db.models.query import QuerySet
 from transmission_rpc import Client
@@ -51,3 +53,33 @@ def match_download(request: HttpRequest):
                         logging.error("Failed to add torrent '%s'.", torrent.title)
             torrent.save()
     return redirect(to="/")
+
+
+def user_login(request: HttpRequest):
+    if request.method == 'GET':
+        redirect_to = request.GET.get('redirect') or 'home'
+        if get_user(request).is_authenticated:
+            return redirect(to=redirect_to)
+        else:
+            return render(request, 'login.html', {
+                'redirect': redirect_to
+            })
+    
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            redirect_to = request.POST.get('redirect') or 'home'
+            return redirect(to=redirect_to)
+        else:
+            raise PermissionDenied
+
+
+def user_logout(request: HttpRequest):
+    if get_user(request).is_authenticated:
+        logout(request)
+    redirect_to = request.GET.get('redirect') or 'home'
+    return redirect(to=redirect_to)
+

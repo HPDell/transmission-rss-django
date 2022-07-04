@@ -19,10 +19,12 @@ from transrss_manager import apis, views
 
 urlpatterns = [
     path('', views.index, name="home"),
-    path('admin/', admin.site.urls),
+    path('admin/', admin.site.urls, name="admin"),
     path('api/feed/', apis.api_feed_source_list),
     path('api/torrent/', apis.api_torrent_list),
     path('api/torrent/<str:id>/', apis.api_torrent_detail),
     path('control/match/', views.match_download),
-    path('feed/<int:id>/', views.feed_detail, name="feed_detail")
+    path('feed/<int:id>/', views.feed_detail, name="feed_detail"),
+    path('login/', views.user_login, name='login'),
+    path('logout/', views.user_logout, name='logout')
 ]
