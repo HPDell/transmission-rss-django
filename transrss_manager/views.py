@@ -1,7 +1,6 @@
 import re
-from typing import final
 import logging
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.http.request import HttpRequest
 from django.db.models.query import QuerySet
 from transmission_rpc import Client
@@ -15,6 +14,15 @@ def index(request: HttpRequest):
     return render(request, "index.html", {
         'feeds': feeds,
         'torrents': torrents
+    })
+
+
+def feed_detail(request: HttpRequest, id: int):
+    feed = get_object_or_404(FeedSource, pk=id)
+    return render(request, 'feed.html', {
+        'feed': feed,
+        'feeds': FeedSource.objects.all(),
+        'matchers': FeedMatcher.objects.filter(source=feed).all()
     })
 
 

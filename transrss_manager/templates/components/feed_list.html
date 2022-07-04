@@ -1,0 +1,13 @@
+<h4 class="ps-3">Feeds</h4>
+<ul class="list-group list-group-flush">
+    <!-- <li class="list-group-item fw-bold">Feeds</li> -->
+    {% for item in feeds %}
+    <li class="list-group-item">
+        {% if feed and item.id == feed.id %}
+        <a class="text-decoration-none text-body fw-bold" href="{% url 'feed_detail' item.id %}">{{item.title}}</a>
+        {% else %}
+        <a class="text-decoration-none text-body" href="{% url 'feed_detail' item.id %}">{{item.title}}</a>
+        {% endif %}
+    </li>
+    {% endfor %}
+</ul>

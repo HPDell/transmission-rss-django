@@ -16,24 +16,26 @@
                 {% include "components/feed_list.html" %}
             </div>
             <div class="col">
-                <h4 class="ps-1">Torrents</h4>
+                <h4 class="ps-1">Info</h4>
+                <dl class="row ps-1">
+                    <dt class="col-1">Title</dt>
+                    <dd class="col-11">{{feed.title}}</dd>
+                    <dt class="col-1">URL</dt>
+                    <dd class="col-11">{{feed.url}}</dd>
+                </dl>
+                <h4 class="ps-1">Matchers</h4>
                 <table class="table">
                     <thead>
                         <tr>
-                            <th scope="col">Title</th>
-                            <th scope="col">Publish Date</th>
+                            <th scope="col">Pattern</th>
+                            <th scope="col">Download Dir</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for torrent in torrents %}
+                        {% for item in matchers %}
                         <tr>
-                            <td>
-                                <a class="text-decoration-none text-body" href="{{torrent.url}}">{{torrent.title}}</a>
-                                {% if torrent.added %}
-                                <i class="bi-check-circle-fill text-success"></i>
-                                {% endif %}
-                            </td>
-                            <td>{{torrent.pub_date|date:"Y-m-d H:i"}}</td>
+                            <td>{{item.pattern}}</td>
+                            <td>{{item.download_dir}}</td>
                         </tr>
                         {% endfor %}
                     </tbody>

@@ -18,10 +18,11 @@ from django.urls import path
 from transrss_manager import apis, views
 
 urlpatterns = [
-    path('', views.index),
+    path('', views.index, name="home"),
     path('admin/', admin.site.urls),
-    path('control/match/', views.match_download),
     path('api/feed/', apis.api_feed_source_list),
     path('api/torrent/', apis.api_torrent_list),
-    path('api/torrent/<str:id>/', apis.api_torrent_detail)
+    path('api/torrent/<str:id>/', apis.api_torrent_detail),
+    path('control/match/', views.match_download),
+    path('feed/<int:id>/', views.feed_detail, name="feed_detail")
 ]
