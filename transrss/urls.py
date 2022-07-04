@@ -29,6 +29,7 @@ urlpatterns = [
     path('feed/<int:id>/delete/', views.feed_delete, name="feed_delete"),
     path('feed/<int:feed_id>/matcher/', views.matcher_list, name="matcher_list"),
     path('feed/<int:feed_id>/matcher/<int:matcher_id>/delete/', views.matcher_delete, name="matcher_delete"),
+    path('torrent/refresh/', views.torrent_refresh, name="torrent_refresh"),
     path('login/', views.user_login, name='login'),
     path('logout/', views.user_logout, name='logout'),
 ]

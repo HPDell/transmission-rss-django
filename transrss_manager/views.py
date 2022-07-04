@@ -1,6 +1,7 @@
 import re
 import logging
-from django.http import HttpResponseBadRequest, HttpResponseForbidden, HttpResponseServerError
+from multiprocessing import Process
+from django.http import HttpResponseForbidden, HttpResponseServerError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth import authenticate, login, logout, get_user
 from django.core.exceptions import PermissionDenied, BadRequest
@@ -10,6 +11,7 @@ from transmission_rpc import Client
 from transrss.settings import TRANSMISSION_CONFIG
 from transrss_manager.models import FeedSource, FeedMatcher, Torrent
 from transrss_manager.forms import FeedAddForm, MatcherAddForm
+from transrss_manager.subscriber import feed_load
 
 
 def index(request: HttpRequest):
@@ -119,6 +121,14 @@ def match_download(request: HttpRequest):
                     except Exception:
                         logging.error("Failed to add torrent '%s'.", torrent.title)
             torrent.save()
+    return redirect(to="/")
+
+
+def torrent_refresh(request: HttpRequest):
+    suber = Process(target=feed_load)
+    suber.daemon = True
+    suber.start()
+    suber.join()
     return redirect(to="/")
 
 

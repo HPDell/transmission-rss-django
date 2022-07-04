@@ -16,7 +16,14 @@
                 {% include "components/feed_list.html" %}
             </div>
             <div class="col">
-                <h4 class="ps-1">Torrents</h4>
+                <div class="d-flex flex-row align-items-top">
+                    <h4 class="ps-1">Torrents</h4>
+                    {% if user.is_authenticated %}
+                    <a class="ms-2 py-1" href="{% url 'torrent_refresh' %}">
+                        <i class="bi-arrow-clockwise"></i>
+                    </a>
+                    {% endif %}
+                </div>
                 <table class="table">
                     <thead>
                         <tr>
