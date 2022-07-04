@@ -44,6 +44,16 @@ def feed_detail(request: HttpRequest, id: int):
             'feeds': FeedSource.objects.all(),
             'matchers': FeedMatcher.objects.filter(source=feed).all()
         })
+    
+    elif request.method == 'POST':
+        form = FeedAddForm(request.POST)
+        if form.is_valid():
+            feed.title = form.cleaned_data['title']
+            feed.url = form.cleaned_data['url']
+            feed.save()
+            return redirect('feed_detail', id=id)
+        else:
+            return HttpResponseServerError()
 
     return HttpResponseForbidden()
 
