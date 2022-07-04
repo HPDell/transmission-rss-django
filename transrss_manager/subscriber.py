@@ -1,6 +1,9 @@
+import os
 import json
+import re
 from datetime import datetime
 from dataclasses import dataclass, field
+from time import sleep
 from typing import List
 import logging
 import urllib3
@@ -12,6 +15,8 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s | %(levelname)s | %(
 
 http = urllib3.PoolManager()
 xmlparser = XmlParser(ParserConfig(fail_on_unknown_properties=False))
+
+SUBSCRIBER_INVERVAL = (lambda x: int(x[0]) if x is not None else 600)(re.match("\d+", os.getenv('SUBSCRIBER_INVERVAL', '600')))
 
 @dataclass
 class FeedSource:
@@ -103,7 +108,7 @@ def feed_parse(feed: FeedSource):
             torrent_upload(item, feed)
 
 
-def subscribe():
+def feed_load():
     fs_res: res.HTTPResponse = http.request('GET', 'http://127.0.0.1:8000/api/feed/')
     if fs_res.status == 200:
         fs_list = json.loads(fs_res.data)
@@ -111,9 +116,23 @@ def subscribe():
             feed = FeedSource(**source)
             logging.info("Reading #%s feed '%s'", i, feed.title)
             feed_parse(feed)
+            logging.info("Successfully load #%s feed '%s'", i, feed.title)
+        match_res: res.HTTPResponse = http.request('GET', 'http://127.0.0.1:8000/control/match/')
+        if match_res.status == 200:
+            logging.info("Successfully refresh all torrents.")
     else:
         logging.error("Failed to fetch feed sources.")
 
 
+def feed_subscribe():
+    logging.info("Start subscribing RSS feeds.")
+    sleep(60)
+    while True:
+        try:
+            feed_load()
+            sleep(SUBSCRIBER_INVERVAL)
+        except Exception as e:
+            e.with_traceback(e.__traceback__)
+
 if __name__ == '__main__':
-    subscribe()
+    feed_load()
