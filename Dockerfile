@@ -6,6 +6,6 @@ WORKDIR /code
 RUN pip install -r requirements.txt
 RUN python manage.py collectstatic
 
-EXPOSE 8000
+EXPOSE 9092
 
 ENTRYPOINT [ "/bin/bash", "startup.sh" ]

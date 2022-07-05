@@ -29,7 +29,7 @@ docker run -d
     --env DJANGO_SUPERUSER_EMAIL=email@example.com      # Django superuser's email
     --env SUBSCRIBER_INVERVAL=600                       # RSS update interval
     --env SUBSCRIBER_MODE=ON                            # [Optional] set off to stop auto-refresh RSS feeds
-    -p 8000:8000
+    -p 9092:9092
     -v $(pwd):/code/db
     hpdell/transmission-rss-django
 ```

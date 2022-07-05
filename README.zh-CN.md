@@ -29,7 +29,7 @@ docker run -d
     --env DJANGO_SUPERUSER_EMAIL=email@example.com      # Django 超级用户的邮箱
     --env SUBSCRIBER_INVERVAL=600                       # RSS 更新间隔
     --env SUBSCRIBER_MODE=ON                            # [可选] 设置为 OFF 以阻止自动刷新 RSS
-    -p 8000:8000
+    -p 9092:9092
     -v $(pwd):/code/db
     hpdell/transmission-rss-django
 ```
