@@ -1,3 +1,4 @@
+from email import header
 import os
 import json
 import re
@@ -16,7 +17,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s | %(levelname)s | %(
 global http
 http = urllib3.PoolManager(headers={
     'Content-Type': 'application/json'
-})
+}, retries=False)
 xmlparser = XmlParser(ParserConfig(fail_on_unknown_properties=False))
 
 SUBSCRIBER_INVERVAL = (lambda x: int(x[0]) if x is not None else 600)(re.match("\d+", os.getenv('SUBSCRIBER_INVERVAL', '600')))
@@ -122,14 +123,17 @@ def feed_parse(feed: FeedSource):
 
 def api_login():
     global http
+    http = urllib3.PoolManager(headers={
+        'Content-Type': 'application/json'
+    }, retries=False)
     auth_res: res.HTTPResponse = http.request('POST', 'http://localhost:8000/api-auth-token/', body=json.dumps(DJANGO_CREDENTIAL).encode('utf-8'))
     if auth_res.status == 200:
         token = json.loads(auth_res.data)['token']
         # http.headers['X-CSRFToken'] = csrftoken
         http = urllib3.PoolManager(headers={
             'Content-Type': 'application/json',
-            'Authorization': f'Token {token}'           
-        })
+            'Authorization': f'Token {token}'
+        }, retries=False)
     else:
         detail = json.loads(auth_res.data)['detail']
         raise ValueError(f"Cannot login with the priveded credential {json.dumps(DJANGO_CREDENTIAL)}: {detail}")
