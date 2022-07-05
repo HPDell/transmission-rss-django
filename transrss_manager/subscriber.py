@@ -5,7 +5,7 @@ import re
 from datetime import datetime
 from dataclasses import dataclass, field
 from time import sleep
-from typing import List
+from typing import List, final
 import logging
 import urllib3
 import urllib3.response as res
@@ -183,9 +183,9 @@ def feed_subscribe():
     while True:
         try:
             feed_load()
-            sleep(SUBSCRIBER_INVERVAL)
         except Exception as e:
             e.with_traceback(e.__traceback__)
+        sleep(SUBSCRIBER_INVERVAL)
 
 if __name__ == '__main__':
     feed_load()
