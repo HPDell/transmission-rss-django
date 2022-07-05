@@ -12,7 +12,7 @@ from transrss_manager.subscriber import feed_load
 
 def index(request: HttpRequest):
     feeds = FeedSource.objects.all()
-    torrents = Torrent.objects.all()
+    torrents = Torrent.objects.order_by('-pub_date').all()
     return render(request, "index.html", {
         'feeds': feeds,
         'torrents': torrents
