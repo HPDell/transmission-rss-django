@@ -45,7 +45,7 @@
                         {% for torrent in torrents %}
                         <tr>
                             <td>
-                                <a class="text-decoration-none text-body torrent-title" href="{{torrent.url}}">{{torrent.title}}</a>
+                                <a class="text-decoration-none text-body torrent-title" href="{{torrent.link}}">{{torrent.title}}</a>
                                 {% if torrent.added %}
                                 <i class="bi-check-circle-fill text-success"></i>
                                 {% endif %}
