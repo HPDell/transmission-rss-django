@@ -158,6 +158,7 @@ def feed_end_update():
 
 
 def feed_load():
+    logging.info("Start checking RSS feeds.")
     api_login()
     feed_begin_update()
     fs_res: res.HTTPResponse = http.request('GET', 'http://localhost:9092/api/feed/')
@@ -174,17 +175,17 @@ def feed_load():
             logging.info("Successfully refresh all torrents.")
     else:
         detail = json.loads(fs_res.data)['detail']
-        logging.error(f"Failed to fetch feed sources: {detail}.")
+        logging.error("Failed to fetch feed sources: %s.", detail)
 
 
 def feed_subscribe():
-    logging.info("Start subscribing RSS feeds.")
     sleep(60)
     while True:
         try:
             feed_load()
         except Exception as e:
             e.with_traceback(e.__traceback__)
+        logging.info("Sleep %s before next check.", SUBSCRIBER_INVERVAL)
         sleep(SUBSCRIBER_INVERVAL)
 
 if __name__ == '__main__':

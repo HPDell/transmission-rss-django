@@ -1,3 +1,4 @@
+import logging
 from multiprocessing import Process
 import os
 from django.apps import AppConfig
@@ -10,6 +11,7 @@ class TransrssManagerConfig(AppConfig):
     ''' Start the subscriber process
     '''
     if os.getenv("SUBSCRIBER_MODE", "ON") != 'OFF':
+        logging.info("Start subscriber.")
         subscriber = Process(target=feed_subscribe)
         subscriber.daemon = True
         subscriber.start()
