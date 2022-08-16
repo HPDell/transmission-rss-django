@@ -28,7 +28,8 @@ SECRET_KEY = 'django-insecure-)jf$c+thr=x)8qkx6cu5%ulvloy8nh(2rz@rn*y#&+xvz0n09&
 DEBUG = (os.getenv('TRANSRSS_MODE', 'RELEASE').upper() == 'DEBUG')
 
 ALLOWED_HOSTS = os.getenv('TRANSRSS_HOST', 'localhost').split(";") + [
-    'localhost'
+    'localhost',
+    '127.0.0.1'
 ]
 
 
