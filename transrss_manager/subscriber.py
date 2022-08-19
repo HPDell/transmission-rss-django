@@ -12,7 +12,11 @@ import urllib3.response as res
 from xsdata.formats.dataclass.parsers import XmlParser
 from xsdata.formats.dataclass.parsers.config import ParserConfig
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s | %(levelname)s | %(message)s')
+logger = logging.getLogger("subscriber_logger")
+logger.setLevel(level=logging.INFO)
+logger_handler = logging.StreamHandler()
+logger_handler.setFormatter(logging.Formatter("%(asctime)s | %(levelname)s | %(message)s"))
+logger.addHandler(logger_handler)
 
 global http
 http = urllib3.PoolManager(headers={
@@ -84,12 +88,12 @@ class RSS:
 def torrent_upload(torrent: RSSTorrent, feed: FeedSource):
     check_res: res.HTTPResponse = http.request('GET', f'http://127.0.0.1:9092/api/torrent/{torrent.guid}/')
     if check_res.status == 200:
-        logging.debug("Torrent already exists: %s", torrent.title)
+        logger.debug("Torrent already exists: %s", torrent.title)
         alive_res: res.HTTPResponse = http.request('PUT', f'http://127.0.0.1:9092/api/torrent/keep-alive/{torrent.guid}/')
         if alive_res.status == 200:
-            logging.debug("Keep torrent alive: %s", torrent.title)
+            logger.debug("Keep torrent alive: %s", torrent.title)
         else:
-            logging.error("Cannot make torrent alive: %s", torrent.title)
+            logger.error("Cannot make torrent alive: %s", torrent.title)
     else:
         upload_data = json.dumps({
             'guid': torrent.guid,
@@ -107,9 +111,9 @@ def torrent_upload(torrent: RSSTorrent, feed: FeedSource):
         }).encode('utf-8')
         upload_res: res.HTTPResponse = http.request('POST', 'http://127.0.0.1:9092/api/torrent/', body=upload_data)
         if upload_res.status == 201:
-            logging.info("Saved torrent %s", torrent.title)
+            logger.info("Saved torrent %s", torrent.title)
         else:
-            logging.error("Error when saving torrent %s: %s", torrent.title, upload_res.data.decode())
+            logger.error("Error when saving torrent %s: %s", torrent.title, upload_res.data.decode())
 
 
 def feed_parse(feed: FeedSource):
@@ -117,7 +121,7 @@ def feed_parse(feed: FeedSource):
     if rss_res.status == 200:
         rss: RSS = xmlparser.from_bytes(rss_res.data, RSS)
         for item in rss.channel.item:
-            logging.debug("Found torrent published at %s : %s", item.pub_date, item.title)
+            logger.debug("Found torrent published at %s : %s", item.pub_date, item.title)
             torrent_upload(item, feed)
 
 
@@ -142,23 +146,23 @@ def api_login():
 def feed_begin_update():
     begin_res: res.HTTPResponse = http.request('POST', 'http://127.0.0.1:9092/api/torrent/begin-update/', fields={})
     if begin_res.status == 200:
-        logging.debug("Set alive to false for all torrents.")
+        logger.debug("Set alive to false for all torrents.")
     else:
-        logging.error("Cannot set alive to false for all torrents.")
+        logger.error("Cannot set alive to false for all torrents.")
         raise RuntimeError("Cannot set alive to false for all torrents.")
 
 
 def feed_end_update():
     begin_res: res.HTTPResponse = http.request('DELETE', 'http://127.0.0.1:9092/api/torrent/end-update/')
     if begin_res.status == 200:
-        logging.debug("Removed all died torrents.")
+        logger.debug("Removed all died torrents.")
     else:
-        logging.error("Cannot remove all died torrents.")
+        logger.error("Cannot remove all died torrents.")
         raise RuntimeError("Cannot remove all died torrents.")
 
 
 def feed_load():
-    logging.info("Start checking RSS feeds.")
+    logger.info("Start checking RSS feeds.")
     api_login()
     feed_begin_update()
     fs_res: res.HTTPResponse = http.request('GET', 'http://127.0.0.1:9092/api/feed/')
@@ -166,16 +170,16 @@ def feed_load():
         fs_list = json.loads(fs_res.data)
         for i, source in enumerate(fs_list):
             feed = FeedSource(**source)
-            logging.info("Reading #%s feed '%s'", i, feed.title)
+            logger.info("Reading #%s feed '%s'", i, feed.title)
             feed_parse(feed)
-            logging.info("Successfully load #%s feed '%s'", i, feed.title)
+            logger.info("Successfully load #%s feed '%s'", i, feed.title)
         feed_end_update()
         match_res: res.HTTPResponse = http.request('GET', 'http://127.0.0.1:9092/api/torrent/match/')
         if match_res.status == 200:
-            logging.info("Successfully refresh all torrents.")
+            logger.info("Successfully refresh all torrents.")
     else:
         detail = json.loads(fs_res.data)['detail']
-        logging.error("Failed to fetch feed sources: %s.", detail)
+        logger.error("Failed to fetch feed sources: %s.", detail)
 
 
 def feed_subscribe():
@@ -184,9 +188,12 @@ def feed_subscribe():
         try:
             feed_load()
         except Exception as e:
-            e.with_traceback(e.__traceback__)
-        logging.info("Sleep %s before next check.", SUBSCRIBER_INVERVAL)
+            logger.error(e)
+        logger.info("Sleep %s before next check.", SUBSCRIBER_INVERVAL)
         sleep(SUBSCRIBER_INVERVAL)
 
 if __name__ == '__main__':
-    feed_load()
+    try:
+        feed_load()
+    except Exception as e:
+        logger.error(e)
