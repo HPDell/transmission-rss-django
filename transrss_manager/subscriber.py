@@ -1,11 +1,10 @@
-from email import header
 import os
 import json
 import re
 from datetime import datetime
 from dataclasses import dataclass, field
 from time import sleep
-from typing import List, final
+from typing import List
 import logging
 import urllib3
 import urllib3.response as res
@@ -24,7 +23,6 @@ http = urllib3.PoolManager(headers={
 }, retries=False)
 xmlparser = XmlParser(ParserConfig(fail_on_unknown_properties=False))
 
-SUBSCRIBER_INVERVAL = (lambda x: int(x[0]) if x is not None else 600)(re.match("\d+", os.getenv('SUBSCRIBER_INVERVAL', '600')))
 DJANGO_CREDENTIAL = {
     'username': os.getenv('DJANGO_SUPERUSER_USERNAME', 'admin'),
     'password': os.getenv('DJANGO_SUPERUSER_PASSWORD', 'admin')
@@ -180,17 +178,6 @@ def feed_load():
     else:
         detail = json.loads(fs_res.data)['detail']
         logger.error("Failed to fetch feed sources: %s.", detail)
-
-
-def feed_subscribe():
-    sleep(60)
-    while True:
-        try:
-            feed_load()
-        except Exception as e:
-            logger.error(e)
-        logger.info("Sleep %s before next check.", SUBSCRIBER_INVERVAL)
-        sleep(SUBSCRIBER_INVERVAL)
 
 if __name__ == '__main__':
     try:

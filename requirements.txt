@@ -5,3 +5,4 @@ xsdata==22.5
 lxml==4.9.1
 transmission-rpc==3.3.2
 cookies==2.2.1
+python-crontab==2.6.0
