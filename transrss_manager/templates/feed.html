@@ -42,7 +42,7 @@
                         {% endif %}
                     </div>
                     {% if user.is_authenticated %}
-                    <div class="modal fade" id="feed-edit-model" tabindex="-1" aria-labelledby="feed-edit-model-label" aria-hidden="true">
+                    <div class="modal fade" id="feed-edit-model" data-bs-backdrop="static"  tabindex="-1" aria-labelledby="feed-edit-model-label" aria-hidden="true">
                         <div class="modal-dialog modal-xl">
                             <div class="modal-content">
                                 <form action="{% url 'feed_detail' feed.id %}" method="POST">
@@ -87,7 +87,7 @@
                         {% endif %}
                     </div>
                     {% if user.is_authenticated %}
-                    <div class="modal fade" id="matcher-add-model" tabindex="-1" aria-labelledby="matcher-add-model-label" aria-hidden="true">
+                    <div class="modal fade" id="matcher-add-model" data-bs-backdrop="static" tabindex="-1" aria-labelledby="matcher-add-model-label" aria-hidden="true">
                         <div class="modal-dialog">
                             <div class="modal-content">
                                 <form action="{% url 'matcher_list' feed.id %}" method="POST">
@@ -98,12 +98,12 @@
                                     </div>
                                     <div class="modal-body">
                                         <div class="mb-3">
-                                            <label for="matcher-pattern">Pattern</label>
-                                            <input type="text" class="form-control" name="pattern" id="matcher-pattern">
+                                            <label for="matcher-new-pattern">Pattern</label>
+                                            <input type="text" class="form-control" name="pattern" id="matcher-new-pattern">
                                         </div>
                                         <div class="mb-3">
-                                            <label for="matcher-download-dir">Download Dir</label>
-                                            <input type="text" class="form-control" name="download_dir" id="matcher-download-dir">
+                                            <label for="matcher-new-download-dir">Download Dir</label>
+                                            <input type="text" class="form-control" name="download_dir" id="matcher-new-download-dir">
                                         </div>
                                     </div>
                                     <div class="modal-footer">
@@ -123,6 +123,7 @@
                                     <th scope="col">Download Dir</th>
                                     {% if user.is_authenticated %}
                                     <th scope="col"></th>
+                                    <th scope="col"></th>
                                     {% endif %}                
                                 </tr>
                             </thead>
@@ -131,6 +132,40 @@
                                 <tr>
                                     <td>{{item.pattern}}</td>
                                     <td>{{item.download_dir}}</td>
+                                    {% if user.is_authenticated %}
+                                    <td>
+                                        <a class="ms-2 py-1" role="button" data-bs-toggle="modal" data-bs-target="#matcher-edit-modal-{{item.id}}" data-bs-matcherpattern="{{item.pattern}}" data-bs-matcherpath="{{item.download_dir}}">
+                                            <i class="bi-pencil-square"></i>
+                                        </a>
+                                        <div class="modal fade" id="matcher-edit-modal-{{item.id}}" data-bs-backdrop="static"  tabindex="-1" aria-labelledby="matcher-edit-modal-label-{{item.id}}" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <form action="{% url 'matcher_detail' feed.id item.id %}" method="POST">
+                                                        {% csrf_token %}
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="matcher-add-model-label-{{item.id}}">Edit Matcher</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <div class="mb-3">
+                                                                <label for="matcher-edit-pattern-{{item.id}}">Pattern</label>
+                                                                <input type="text" class="form-control" name="pattern" id="matcher-edit-pattern-{{item.id}}" value="{{item.pattern}}">
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <label for="matcher-edit-download-dir-{{item.id}}">Download Dir</label>
+                                                                <input type="text" class="form-control" name="download_dir" id="matcher-edit-download-dir-{{item.id}}" value="{{item.download_dir}}">
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                            <button type="submit" class="btn btn-primary">Save changes</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    {% endif %}                
                                     {% if user.is_authenticated %}
                                     <td>
                                         <form action="{% url 'matcher_delete' feed.id item.id %}" method="POST">

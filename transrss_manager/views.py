@@ -96,6 +96,25 @@ def matcher_list(request: HttpRequest, feed_id: int):
     return HttpResponseForbidden()
 
 
+def matcher_detail(request: HttpRequest, feed_id: int, matcher_id: int):
+    matcher = get_object_or_404(FeedMatcher, pk=matcher_id, source=feed_id)
+    
+    if request.method == 'GET':
+        return HttpResponseForbidden()
+    
+    elif request.method == 'POST':
+        if not request.user.is_authenticated:
+            raise PermissionDenied
+        form = MatcherAddForm(request.POST)
+        if form.is_valid():
+            matcher.pattern = form.cleaned_data['pattern']
+            matcher.download_dir = form.cleaned_data['download_dir']
+            matcher.save()
+            return redirect('feed_detail', id=feed_id)
+        else:
+            return HttpResponseServerError()
+
+
 def matcher_delete(request: HttpRequest, feed_id: int, matcher_id: int):
     if request.method == 'POST':
         if not request.user.is_authenticated:
