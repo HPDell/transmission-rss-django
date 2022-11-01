@@ -135,7 +135,7 @@ def torrent_refresh(request: HttpRequest):
     suber.daemon = True
     suber.start()
     suber.join()
-    return redirect(to="/")
+    return redirect(to="home")
 
 
 def user_login(request: HttpRequest):
