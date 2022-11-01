@@ -79,7 +79,7 @@
 <body class="text-center">
 
     <main class="form-signin">
-        <form action="/login/" method="post">
+        <form action="{% url 'login' %}" method="post">
             {% csrf_token %}
             <input type="text" name="redirect" value="{{redirect|escape}}" class="invisible">
             <!-- <img class="mb-4" src="/docs/5.1/assets/brand/bootstrap-logo.svg" alt="" width="72" height="57"> -->
