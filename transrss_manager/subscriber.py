@@ -119,7 +119,8 @@ def torrent_upload(torrent: RSSTorrent, feed: FeedSource):
 def feed_parse(feed: FeedSource):
     rss_res: res.HTTPResponse = http.request('GET', feed.url)
     if rss_res.status == 200:
-        rss: RSS = xmlparser.from_bytes(rss_res.data, RSS)
+        rss_body = ''.join([x for x in rss_res.data.decode() if x.isprintable()])
+        rss: RSS = xmlparser.from_string(rss_body, RSS)
         for item in rss.channel.item:
             logger.debug("Found torrent published at %s : %s", item.pub_date, item.title)
             torrent_upload(item, feed)
