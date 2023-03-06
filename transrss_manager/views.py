@@ -1,5 +1,5 @@
 from multiprocessing import Process
-from this import d
+from datetime import datetime
 from django.http import HttpResponseForbidden, HttpResponseServerError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth import authenticate, login, logout, get_user
@@ -7,8 +7,7 @@ from django.core.exceptions import PermissionDenied, BadRequest
 from django.http.request import HttpRequest
 from transrss_manager.models import FeedSource, FeedMatcher, Torrent
 from transrss_manager.forms import FeedAddForm, MatcherAddForm
-from transrss_manager.subscriber import feed_load
-
+from transrss_manager.subscriber import feed_load, RSS, xmlparser, http as pt
 
 def index(request: HttpRequest):
     feeds = FeedSource.objects.all()
@@ -166,3 +165,34 @@ def user_logout(request: HttpRequest):
     redirect_to = request.GET.get('redirect') or 'home'
     return redirect(to=redirect_to)
 
+
+def search_list(request: HttpRequest):
+    if request.method == 'GET':
+        feeds = FeedSource.objects.all()
+        torrents = []
+        if 'search' in request.GET:
+            """ Perform search
+            """
+            feed = get_object_or_404(FeedSource, pk=request.GET['feed'])
+            search = request.GET['search']
+            pt_res = pt.request('GET', f'{feed.url}&search={search}')
+            if pt_res.status == 200:
+                rss_body = ''.join([x for x in pt_res.data.decode() if x.isprintable()])
+                rss: RSS = xmlparser.from_string(rss_body, RSS)
+                torrents = rss.channel.item
+    
+        return render(request, 'search.html', {
+            'feeds': feeds,
+            'torrents': [{
+                'title': t.title,
+                'description': t.description,
+                'pub_date': datetime.strptime(t.pub_date, "%a, %d %b %Y %H:%M:%S %z"),
+                'link': t.link,
+                'guid': t.guid,
+                'author': t.author,
+                'enclosure': t.enclosure,
+                'comments': t.comments,
+                'category': t.category
+            } for t in torrents]
+        })
+            

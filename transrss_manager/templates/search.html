@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transmission RSS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.3/font/bootstrap-icons.css">
+    <style>
+        #feed-list-container {
+            display: block;   
+        }
+
+        .feed-url {
+            word-break: break-all;
+            word-wrap: break-word;
+        }
+        
+        .torrent-title {
+            word-break: break-all;
+            word-wrap: break-word;
+            width: 100%;
+        }
+
+        .torrent-publish-date {
+            word-break: keep-all;
+        }
+
+        @media (max-width: 768px) {
+            #feed-list-container {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% include "components/navbar.html" %}
+    <div class="container py-3">
+        <div class="row">
+            <form action="{% url 'search_list' %}" method="get">
+                <div class="row g-2 align-items-center mb-3">
+                    <label class="col-sm-1 col-form-label" for="searchFeed">Feed</label>
+                    <div class="col-sm-11">
+                        <select id="searchFeed" class="form-select" aria-label="feedSelect" name="feed">
+                            <option>Select a feed</option>
+                            {% if feeds %}
+                                {% for feed in feeds %}
+                                    {% if feed.id|stringformat:"i" == request.GET.feed|first %}
+                                    <option value="{{ feed.id }}" selected>{{ feed.title }}</option>
+                                    {% else %}
+                                    <option value="{{ feed.id }}">{{ feed.title }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                        </select>
+                    </div>
+                </div>
+                <div class="row g-2 align-items-center mb-3">
+                    <label class="col-sm-1 col-form-label" for="searchKeyword" class="form-label">Search</label>
+                    <div class="col-sm-11">
+                        <input type="text" class="form-control" id="searchKeyword" name="search" value="{{ request.GET.search }}">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-auto">
+                        <input type="submit" class="btn btn-primary" value="Search">
+                    </div>
+                </div>
+            </form>
+        </div>
+        <hr>
+        <div class="row">
+            {% if torrents %}
+            <table class="table mx-2">
+                <thead>
+                    <tr>
+                        <th scope="col">Title</th>
+                        <th scope="col">Publish Date</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for torrent in torrents %}
+                    <tr>
+                        <td class="torrent-title">
+                            <a class="text-decoration-none text-body" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="torrent-detail-{{ torrent.guid }}" href="#torrent-detail-{{ torrent.guid }}">{{ torrent.title }}</a>
+                            <div class="collapse" id="torrent-detail-{{ torrent.guid }}">
+                                <p>
+                                    {{ torrent.description|safe }}
+                                </p>
+                            </div>
+                        </td>
+                        <td class="torrent-publish-date" nowrap>{{torrent.pub_date|date:"Y-m-d H:i"}}</td>
+                        <td>
+                            <a href="{{torrent.enclosure.url}}" target="_blank">Download</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
+</body>
+</html>
