@@ -11,6 +11,7 @@
         .torrent-title {
             word-break: break-all;
             word-wrap: break-word;
+            width: 100%;
         }
 
         .torrent-publish-date {
@@ -44,13 +45,13 @@
                     <tbody>
                         {% for torrent in torrents %}
                         <tr>
-                            <td>
-                                <a class="text-decoration-none text-body torrent-title" href="{{torrent.link}}">{{torrent.title}}</a>
+                            <td class="torrent-title">
+                                <a class="text-decoration-none text-body" href="{{torrent.enclosure_url}}" target="_blank">{{torrent.title}}</a>
                                 {% if torrent.added %}
                                 <i class="bi-check-circle-fill text-success"></i>
                                 {% endif %}
                             </td>
-                            <td class="torrent-publish-date">{{torrent.pub_date|date:"Y-m-d H:i"}}</td>
+                            <td class="torrent-publish-date" nowrap>{{torrent.pub_date|date:"Y-m-d H:i"}}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
