@@ -41,6 +41,7 @@ urlpatterns = [
         path('feed/<int:feed_id>/matcher/<int:matcher_id>/', views.matcher_detail, name="matcher_detail"),
         path('feed/<int:feed_id>/matcher/<int:matcher_id>/delete/', views.matcher_delete, name="matcher_delete"),
         path('torrent/refresh/', views.torrent_refresh, name="torrent_refresh"),
+        path('search/', views.search_list, name="search_list"),
         path('login/', views.user_login, name='login'),
         path('logout/', views.user_logout, name='logout'),
         re_path(r'^static/(?P<path>.*)$', serve, { 'document_root': STATIC_ROOT })
