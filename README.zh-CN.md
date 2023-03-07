@@ -7,9 +7,19 @@
 
 基于 Django 构建。
 
+## 特性
+
+种子列表和源列表。
+
 ![Home Page](README.assets/trrssd-home-page.png)
 
+为每个源管理匹配器（支持正则表达式）。
+
 ![Feed Page](README.assets/trrssd-feed-page.png)
+
+根据关键词搜索源。
+
+![Feed Search](README.assets/trrssd-feed-search.png)
 
 ## Deployment
 

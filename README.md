@@ -7,9 +7,19 @@
 
 Powered by Django.
 
+## Features
+
+Torrent list and feed list.
+
 ![Home Page](README.assets/trrssd-home-page.png)
 
+Manage mathcers for each feed (regular expression is supported).
+
 ![Feed Page](README.assets/trrssd-feed-page.png)
+
+Search feed by keywrods.
+
+![Feed Search](README.assets/trrssd-feed-search.png)
 
 ## Deployment
 
