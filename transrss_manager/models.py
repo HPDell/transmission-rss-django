@@ -45,3 +45,10 @@ class FeedMatcher(models.Model):
 
     def __str__(self) -> str:
         return self.pattern
+
+
+class State(models.Model):
+    '''
+    Server state
+    '''
+    refreshing = models.BooleanField(default=False)

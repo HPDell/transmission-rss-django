@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import FeedSource, FeedMatcher, Torrent
+from .models import FeedSource, FeedMatcher, Torrent, State
 
 # Register your models here.
 class FeedSourceAdmin(admin.ModelAdmin):
@@ -14,3 +14,4 @@ class TorrentAdmin(admin.ModelAdmin):
 admin.site.register(FeedSource, FeedSourceAdmin)
 admin.site.register(FeedMatcher, FeedMatcherAdmin)
 admin.site.register(Torrent, TorrentAdmin)
+admin.site.register(State)

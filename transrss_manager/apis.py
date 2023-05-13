@@ -17,7 +17,7 @@ from rest_framework.request import HttpRequest
 from rest_framework.response import Response
 from transmission_rpc import Client
 from transrss.settings import TRANSMISSION_CONFIG
-from .models import FeedSource, FeedMatcher, Torrent
+from .models import FeedSource, FeedMatcher, Torrent, State
 from .serializers import FeedSourceSerializer, TorrentSerializer
 
 
@@ -134,6 +134,11 @@ def api_torrent_begin_update(request: HttpRequest):
     for item in torrent_all:
         item.alive = False
         item.save()
+    ''' Update state
+    '''
+    state, _ = State.objects.get_or_create(id=0)
+    state.refreshing = True
+    state.save()
     return Response(status=status.HTTP_200_OK)
 
 
@@ -163,7 +168,7 @@ def api_torrent_keep_alive_batch(request: HttpRequest):
             active_status.append(0)
         except Model.DoesNotExist:
             active_status.append(1)
-    return Response(status=status.HTTP_200_OK)
+    return Response(active_status, status=status.HTTP_200_OK)
 
 
 @csrf_exempt
@@ -173,4 +178,9 @@ def api_torrent_keep_alive_batch(request: HttpRequest):
 def api_torrent_end_update(request: HttpRequest):
     torrent_died = Torrent.objects.filter(alive=False).all()
     torrent_died.delete()
+    ''' Update state
+    '''
+    state, _ = State.objects.get_or_create(id=0)
+    state.refreshing = False
+    state.save()
     return Response(status=status.HTTP_200_OK)

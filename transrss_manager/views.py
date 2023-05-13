@@ -5,16 +5,19 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth import authenticate, login, logout, get_user
 from django.core.exceptions import PermissionDenied, BadRequest
 from django.http.request import HttpRequest
-from transrss_manager.models import FeedSource, FeedMatcher, Torrent
+from transrss_manager.models import FeedSource, FeedMatcher, Torrent, State
 from transrss_manager.forms import FeedAddForm, MatcherAddForm
 from transrss_manager.subscriber import feed_load, RSS, xmlparser, http as pt
+
 
 def index(request: HttpRequest):
     feeds = FeedSource.objects.all()
     torrents = Torrent.objects.order_by('-pub_date').all()
+    state, _ = State.objects.get_or_create(id=0)
     return render(request, "index.html", {
         'feeds': feeds,
-        'torrents': torrents
+        'torrents': torrents,
+        'state': state
     })
 
 
@@ -133,7 +136,7 @@ def torrent_refresh(request: HttpRequest):
     suber = Process(target=feed_load)
     suber.daemon = True
     suber.start()
-    suber.join()
+    # suber.join()
     return redirect(to="home")
 
 
