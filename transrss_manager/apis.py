@@ -1,3 +1,5 @@
+from typing import List
+import json
 import re
 import logging
 from django.http import JsonResponse
@@ -5,6 +7,7 @@ from django.core.exceptions import PermissionDenied
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404
 from django.db.models.query import QuerySet
+from django.db.models import Model
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
@@ -49,6 +52,17 @@ def api_torrent_list(request: HttpRequest):
         return Response(serializer.errors, status=400)
     
     return Response(status=status.HTTP_403_FORBIDDEN)
+
+
+@csrf_exempt
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def api_torrent_status(request: HttpRequest):
+    torrent_ids: List[str] = json.loads(request.body)
+    torrent_status = [len(Torrent.objects.filter(guid=id)) for id in torrent_ids]
+    return Response(torrent_status)
+
 
 
 @csrf_exempt
@@ -131,6 +145,24 @@ def api_torrent_keep_alive(request: HttpRequest, guid: str):
     torrent = get_object_or_404(Torrent, pk=guid)
     torrent.alive = True
     torrent.save()
+    return Response(status=status.HTTP_200_OK)
+
+
+@csrf_exempt
+@api_view(['PUT'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def api_torrent_keep_alive_batch(request: HttpRequest):
+    torrent_ids: List[str] = json.loads(request.body)
+    active_status: List[int] = []
+    for guid in torrent_ids:
+        try:
+            torrent = Torrent.objects.get(guid=guid)
+            torrent.alive = True
+            torrent.save()
+            active_status.append(0)
+        except Model.DoesNotExist:
+            active_status.append(1)
     return Response(status=status.HTTP_200_OK)
 
 

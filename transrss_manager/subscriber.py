@@ -85,6 +85,49 @@ class RSS:
     channel: RSSChannel = field(metadata={'type': 'Element'})
 
 
+def torrent_upload_batch(torrents: List[RSSTorrent], feed: FeedSource):
+    torrent_ids = [x.guid for x in torrents]
+    check_res: res.HTTPResponse = http.request('GET', f'{API_BASE_URL}/api/torrent/status/', body=json.dumps(torrent_ids))
+    if check_res.status == 200:
+        torrent_status = json.loads(check_res.data)
+        alive_torrents: List[RSSTorrent] = []
+        for status, torrent in zip(torrent_status, torrents):
+            if status == 0:
+                upload_res: res.HTTPResponse = http.request('POST', f'{API_BASE_URL}/api/torrent/', body=json.dumps({
+                    'guid': torrent.guid,
+                    'title': torrent.title,
+                    'pub_date': datetime.strptime(torrent.pub_date, "%a, %d %b %Y %H:%M:%S %z").strftime("%Y-%m-%dT%H:%M:%S"),
+                    'link': torrent.link,
+                    'enclosure_type': torrent.enclosure.type,
+                    'enclosure_length': torrent.enclosure.length,
+                    'enclosure_url': torrent.enclosure.url,
+                    'source': {
+                        'id': feed.id,
+                        'title': feed.title,
+                        'url': feed.url
+                    }
+                }))
+                if upload_res.status == 201:
+                    logger.info("Saved torrent %s", torrent.title)
+                else:
+                    logger.error("Error when saving torrent %s: %s", torrent.title, upload_res.data.decode())
+            elif status == 1:
+                alive_torrents.append(torrent)
+            else:
+                logger.error("Invalid status code %s for torrent %s.", status, torrent.title)
+        ### Keep Alive
+        alive_res: res.HTTPResponse = http.request('PUT', f'{API_BASE_URL}/api/torrent/keep-alive/', body=json.dumps([x.guid for x in alive_torrents]))
+        if alive_res.status == 200:
+            alive_status: List[int] = json.loads(alive_res.data)
+            for status, torrent in zip(alive_status, alive_torrents):
+                if status == 0:
+                    logger.debug("Keep torrent alive: %s", torrent.title)
+                else:
+                    logger.error("Cannot make torrent alive: %s", torrent.title)
+    else:
+        logger.error("Cannot get torrent status in feed: %s", feed.title)
+
+
 def torrent_upload(torrent: RSSTorrent, feed: FeedSource):
     check_res: res.HTTPResponse = http.request('GET', f'{API_BASE_URL}/api/torrent/{torrent.guid}/')
     if check_res.status == 200:
@@ -121,9 +164,10 @@ def feed_parse(feed: FeedSource):
     if rss_res.status == 200:
         rss_body = ''.join([x for x in rss_res.data.decode() if x.isprintable()])
         rss: RSS = xmlparser.from_string(rss_body, RSS)
-        for item in rss.channel.item:
-            logger.debug("Found torrent published at %s : %s", item.pub_date, item.title)
-            torrent_upload(item, feed)
+        # for item in rss.channel.item:
+        #     logger.debug("Found torrent published at %s : %s", item.pub_date, item.title)
+        #     torrent_upload(item, feed)
+        torrent_upload_batch(rss.channel.item, feed)
 
 
 def api_login():
