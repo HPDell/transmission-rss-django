@@ -6,14 +6,11 @@ name: Docker
 # documentation.
 
 on:
-  schedule:
-    - cron: '26 14 * * *'
   push:
     branches: [ "master" ]
     # Publish semver tags as releases.
     tags: [ 'v*.*.*' ]
-  pull_request:
-    branches: [ "master" ]
+  workflow_dispatch:
 
 env:
   # github.repository as <account>/<repo>
@@ -72,7 +69,7 @@ jobs:
         uses: docker/build-push-action@ac9327eae2b366085ac7f6a2d02df8aa8ead720a
         with:
           context: .
-          push: ${{ github.event_name != 'pull_request' }}
+          push: ${{ github.ref_type != 'tag' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
