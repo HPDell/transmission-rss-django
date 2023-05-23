@@ -136,7 +136,7 @@ def api_torrent_begin_update(request: HttpRequest):
         item.save()
     ''' Update state
     '''
-    state, _ = State.objects.get_or_create(id=0)
+    state, _ = State.objects.get_or_create(id=1)
     state.refreshing = True
     state.save()
     return Response(status=status.HTTP_200_OK)
@@ -180,7 +180,7 @@ def api_torrent_end_update(request: HttpRequest):
     torrent_died.delete()
     ''' Update state
     '''
-    state, _ = State.objects.get_or_create(id=0)
+    state, _ = State.objects.get_or_create(id=1)
     state.refreshing = False
     state.save()
     return Response(status=status.HTTP_200_OK)
