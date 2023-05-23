@@ -13,7 +13,7 @@ from transrss_manager.subscriber import feed_load, RSS, xmlparser, http as pt
 def index(request: HttpRequest):
     feeds = FeedSource.objects.all()
     torrents = Torrent.objects.order_by('-pub_date').all()
-    state, _ = State.objects.get_or_create(id=0)
+    state, _ = State.objects.get_or_create(id=1)
     return render(request, "index.html", {
         'feeds': feeds,
         'torrents': torrents,
